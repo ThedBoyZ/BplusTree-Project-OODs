@@ -393,7 +393,7 @@ def measure_time(func, *args):
 
 def main():
     bplustree = BplusTree(3)  
-    measure_time(add_guests, "Hotel", 10)
+    # measure_time(add_guests, "Hotel", 10)
     measure_time(add_room_manual, 101, "Special Guest")
     measure_time(remove_room_manual, 1)
     measure_time(sort_rooms)
