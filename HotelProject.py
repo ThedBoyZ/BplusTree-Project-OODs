@@ -305,11 +305,64 @@ guest_data = {
 }
 
 # Function Group 1 - Guest Management
-def generate_room_number(channel):
-    pass
+'''
+receive_guests() เป็นฟังชันไว้จัดการ input
+format input : เช่น fleet:5,4,7,10/bus:3,4
+    - fleet:จำนวนกองเรือ,จำนวนเรือ,จำนวนรถบัส,จำนวนwalk-in
+    - ship:จำนวนเรือ,จำนวนรถบัส,จำนวนwalk-in
+    - bus:จำนวนรถบัส,จำนวนwalk-in
+    - walk_in:จำนวนwalk-in
 
-def add_guests(channel, num_guests):
+generate_room_number()
+- รอฟังก์ชันนับห้อง ตอนนี้สมมุติจำนวนแขกเก่าทั้งหมด (พารามิเตอร์ old_guest )
+- รอฟังก์ชัน sort เลขห้อง ตอนนี้ใช้ .sort() แทน
+- return เป็น list ของ (เลขห้อง,[ช่องทางของแขก, , , ])
+
+
+คิดว่า add_guest ไม่ต้องมีเพราะ 1 ห้อง มีได้ 1 คนอยู่แล้ว
+เปลี่ยน add_guest เป็น add_room  (อัตโนมัติ) แทนได้เลย
+เดี๋ยว Junior ทำเอง
+'''
+def generate_room_number(num_walk_in = 1, num_bus = 1, num_ship = 1, num_fleet = 1 , old_guest = 10): 
+      room_number = []
+      for o in range(old_guest) :
+            room_num = pow(2,o)*pow(3,0)*pow(5,0)*pow(7,0)
+            room_number.append((room_num,[0,0,0,o]))
+      for i in range(1,num_fleet+1) :
+            for j in range(1,num_ship+1) :
+                  for k in range(1,num_bus+1) :
+                        for l  in range(1,num_walk_in+1) :
+                              room_num = pow(2,l)*pow(3,k)*pow(5,j)*pow(7,i)
+                              room_number.append((room_num,[i,j,k,l]))
+      room_number.sort() # รอฟังก์ชัน sort
+      return room_number
+
+def receive_guests():
+      receive_guests = [x for x in input("Route of guest arrival : ").split('/')]
+      for i in range(len(receive_guests)) :
+            route,amount = receive_guests[i].split(':')
+            if route == 'walk_in' :
+                  num_walk_in = amount[0]
+                  list_room_number = generate_room_number(int(num_walk_in))
+            elif route == 'bus' :
+                  num_bus , num_walk_in = amount.split(',')
+                  list_room_number = generate_room_number(int(num_walk_in),int(num_bus))
+            elif route == 'ship' :
+                  num_ship, num_bus , num_walk_in = amount.split(',')
+                  list_room_number = generate_room_number(int(num_walk_in),int(num_bus),int(num_ship))
+            elif route == 'fleet' :
+                  num_fleet, num_ship, num_bus , num_walk_in = amount.split(',')
+                  list_room_number = generate_room_number(int(num_walk_in),int(num_bus),int(num_ship),int(num_fleet))
+      return list_room_number
+
+def add_room(list_room_number):
     pass
+                              
+
+
+
+
+
 
 # Function Group 2 - Manual Room Management
 def add_room_manual(room_number, guest_info):
