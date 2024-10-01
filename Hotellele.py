@@ -520,10 +520,10 @@ def manage_command():
     elif command == 'SH' :   
         print(bplustree.inorder_leaf())
         return True
-    elif command == 'PT' :   # 
+    elif command == 'PT' :   
         bplustree.print_tree()
         return True
-    elif command == 'DT' :   # 
+    elif command == 'DT' :   
         show_hotel_data()
         return True
     else:
@@ -535,5 +535,6 @@ if __name__ == '__main__':
     recieve_command = True
     while recieve_command :
         recieve_command = manage_command()
+    
     
     
