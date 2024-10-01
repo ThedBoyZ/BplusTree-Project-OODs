@@ -300,21 +300,21 @@ def printTree(tree):
 
 record_len = 3
 bplustree = BplusTree(record_len)
-bplustree.insert('5', '33')
-bplustree.insert('15', '21')
-bplustree.insert('25', '31')
-bplustree.insert('35', '41')
-bplustree.insert('45', '10')
+bplustree.insert(5, '33')
+bplustree.insert(15, '21')
+bplustree.insert(25, '31')
+bplustree.insert(35, '41')
+bplustree.insert(45, '10')
 
 if(bplustree.find('15', '21')):
     print("Found")
 else:
     print("Not found")
     
-bplustree.delete('15', '21')
+# bplustree.delete('15', '21')
 printTree(bplustree)
 
-if(bplustree.find('15', '21')):
-    print("Found")
-else:
-    print("Not found")
+# if(bplustree.find('15', '21')):
+#     print("Found")
+# else:
+#     print("Not found")
