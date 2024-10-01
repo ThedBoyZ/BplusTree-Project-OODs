@@ -312,17 +312,17 @@ class BPlusTree(object):
                 _last = (i == len(node.values) - 1)
                 self.print_tree(child, file, _prefix, _last)
 
-    def output(self):
-        return splits, parent_splits, fusions, parent_fusions, self.depth
+    # def output(self):
+    #     return splits, parent_splits, fusions, parent_fusions, self.depth
 
-    def readfile(self, reader):
-        i = 0
-        for i, line in enumerate(reader):
-            s = line.decode().split(maxsplit=1)
-            self[s[0]] = s[1]
-            if i % 1000 == 0:
-                print('Insert ' + str(i) + 'items')
-        return i + 1
+    # def readfile(self, reader):
+    #     i = 0
+    #     for i, line in enumerate(reader):
+    #         s = line.decode().split(maxsplit=1)
+    #         self[s[0]] = s[1]
+    #         if i % 1000 == 0:
+    #             print('Insert ' + str(i) + 'items')
+    #     return i + 1
 
     def leftmost_leaf(self) -> Leaf:
         node = self.root
