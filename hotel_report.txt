@@ -1,0 +1,6 @@
+room_number : 1 , route : no_0_0_0_0_1
+room_number : 2 , route : no_0_0_0_0_2
+room_number : 3 , route : no_0_0_0_0_3
+room_number : 4 , route : no_0_0_0_0_4
+room_number : 5 , route : no_0_0_0_0_5
+room_number : 7 , route : no_1_0_0_0_0
