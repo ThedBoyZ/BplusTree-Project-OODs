@@ -235,7 +235,7 @@ class BPlusTree(object):
         if len(leaf.keys) > self.maximum:
             self.insert_index(*leaf.split())
 
-    def find(self, key) -> Leaf:
+    def find(self, key) -> Leaf:  #Tin
         """ find the leaf
         Returns:
             Leaf: the leaf which should have the key
@@ -247,7 +247,7 @@ class BPlusTree(object):
 
         return node
 
-    def insert(self, key, value):
+    def insert(self, key, value): 
         """
         Returns:
             (bool,Leaf): the leaf where the key is inserted. return False if already has same key
@@ -277,7 +277,7 @@ class BPlusTree(object):
         # Once a leaf node is split, it consists of a internal node and two leaf nodes.
         # These need to be re-inserted back into the tree.
 
-    def delete(self, key, node: Node = None):
+    def delete(self, key, node: Node = None): # delete
         if node is None:
             node = self.find(key)
         del node[key]
@@ -294,7 +294,7 @@ class BPlusTree(object):
                 node.fusion()
                 self.delete(key, node.parent)
 
-    def print_tree(self, node=None, file=None, _prefix="", _last=True):
+    def print_tree(self, node=None, file=None, _prefix="", _last=True):  #junior
         """Prints the keys at each level."""
         if node is None:
             node = self.root
@@ -307,7 +307,7 @@ class BPlusTree(object):
                 _last = (i == len(node.values) - 1)
                 self.print_tree(child, file, _prefix, _last)
 
-    def append_tree(self, node=None, file=None, _prefix="", _last=True):
+    def append_tree(self, node=None, file=None, _prefix="", _last=True):  #blue
         """Prints the keys at each level."""
         if node is None:
             node = self.root
@@ -320,14 +320,14 @@ class BPlusTree(object):
                 self.append_tree(child, file, _prefix, _last)
 
 
-    def leftmost_leaf(self) -> Leaf:
+    def leftmost_leaf(self) -> Leaf: #Tin
         node = self.root
         while type(node) is not Leaf:
             node = node.values[0]
         return node
 
     
-    def inorder_leaf(self):
+    def inorder_leaf(self): #Tin
         start_time = time.time()
         """Perform in-order traversal and return keys (room numbers) from the leaf nodes only."""
         leaf = bplustree.leftmost_leaf()  # Start from the leftmost leaf
@@ -370,47 +370,47 @@ def generate_room_number(num_walk_in=1, num_bus=1, num_ship=1, num_fleet=1):
     return room_number
 
 def receive_guests():
-    global total_num_walk_in, total_num_bus, total_num_ship, total_num_fleet
-    start_time = time.time()
+    # global total_num_walk_in, total_num_bus, total_num_ship, total_num_fleet
     
     receive_guests = [x for x in input("Route of guest arrival : ").split('/')]
-    
+    start_time = time.time()
     for i in range(len(receive_guests)):
         route, amount = receive_guests[i].split(':')
         if route == 'walk_in':
             num_walk_in = int(amount)
-            total_num_walk_in += num_walk_in
+            # total_num_walk_in += num_walk_in
             list_room_number = generate_room_number(num_walk_in)
             add_room(list_room_number)
             
         elif route == 'bus':
             num_bus, num_walk_in = map(int, amount.split(','))
-            total_num_bus += num_bus
-            total_num_walk_in += num_walk_in
+            # total_num_bus += num_bus
+            # total_num_walk_in += num_walk_in
             list_room_number = generate_room_number(num_walk_in, num_bus)
             add_room(list_room_number)
         
         elif route == 'ship':
             num_ship, num_bus, num_walk_in = map(int, amount.split(','))
-            total_num_ship += num_ship
-            total_num_bus += num_bus
-            total_num_walk_in += num_walk_in
+            # total_num_ship += num_ship
+            # total_num_bus += num_bus
+            # total_num_walk_in += num_walk_in
             list_room_number = generate_room_number(num_walk_in, num_bus, num_ship)
             add_room(list_room_number)
         
         elif route == 'fleet':
             num_fleet, num_ship, num_bus, num_walk_in = map(int, amount.split(','))
-            total_num_fleet += num_fleet
-            total_num_ship += num_ship
-            total_num_bus += num_bus
-            total_num_walk_in += num_walk_in
+            # total_num_fleet += num_fleet
+            # total_num_ship += num_ship
+            # total_num_bus += num_bus
+            # total_num_walk_in += num_walk_in
             list_room_number = generate_room_number(num_walk_in, num_bus, num_ship, num_fleet)
             add_room(list_room_number)
-                  
-    end_time = time.time()
-    execute_time = end_time - start_time
-    execution_times["receive_guests"] = execute_time
-    print(f"receive_guests - time used = {execute_time:.4f} seconds")
+    if route == 'walk_in' or route == 'bus' or route == 'ship' or route == 'fleet':
+        print("Route : ", route)
+        end_time = time.time()
+        execute_time = end_time - start_time
+        execution_times["receive_guests"] = execute_time
+        print(f"receive_guests - time used = {execute_time:.4f} seconds")
 
 
 def add_room(list_room_number):
@@ -442,21 +442,19 @@ def move_old_guest(list_old_guest):
 #-----------------------------------------------------------------------------------------------------------------------------------------------
 # Function Group 2 - Manual Room Management
 def add_room_manual():
-    start_time = time.time()
-    
     global manual_count
     room_number_add = input("Enter room number : ")
+    start_time = time.time()
     if room_number_add == '0' or (not room_number_add.isnumeric()) :
         print("Room number must be countable number ")
         return
-    room_number_add  =int(room_number_add)
+    room_number_add  = int(room_number_add)
     if search_room(room_number_add) :
-        return
+        print (f"Room {room_number_add} is occupied.") 
     else :
         bplustree.insert(room_number_add,[manual_count,0,0,0,0])
         manual_count += 1
         print(f"Room number {room_number_add} added successfully.")
-
 
     end_time = time.time()
     execute_time = end_time - start_time
@@ -464,29 +462,26 @@ def add_room_manual():
     print(f"add_room_manual - time used = {execute_time:.4f} seconds")
 
 def remove_room_manual():
-    start_time = time.time()
-    
     room_number_remove = int(input("Enter room number : "))
+    start_time = time.time()
     if not search_room(room_number_remove) :
         print (f"Room {room_number_remove} does not exist in the hotel.")
         return
     else :
         bplustree.delete(room_number_remove)
         print(f"Room number {room_number_remove} removed successfully.")
-        
     end_time = time.time()
     execute_time = end_time - start_time
     execution_times["remove_room_manual"] = execute_time
-    print(f"remove_room_manual - time used = {execute_time:.4f} seconds")
+    print(f"remove_room_manual - time used = {execute_time:.4f} seconds")        
+
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # Function Group 3 - Room Operations and Display
-
 def search_room(find_room = None) :
-    start_time = time.time()
-    
     p = 0
     if find_room == None :
         room_number = int(input("Seacrh Room Number: "))
+        start_time = time.time()
     else :
         p = 1
         room_number = find_room
@@ -551,7 +546,8 @@ def display_memory_usage(data):
     print(f"Memory usage: {memory_usage} bytes for {total_elements} elements.")
 
 def write_to_file(filename="hotel_report.txt"):
-    global room_number, total_num_walk_in, total_num_bus, total_num_ship, total_num_fleet
+    global room_number
+    # , total_num_walk_in, total_num_bus, total_num_ship, total_num_fleet
     
     with open(filename, "w") as file:
         
@@ -647,8 +643,3 @@ if __name__ == '__main__':
     recieve_command = True
     while recieve_command :
         recieve_command = manage_command()
-
-
-
-    
-    
