@@ -341,7 +341,6 @@ class BPlusTree(object):
         return result
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------
-
 def generate_room_number(num_walk_in=1, num_bus=1, num_ship=1, num_fleet=1): 
     start_time = time.time()
     global room_number
@@ -354,13 +353,15 @@ def generate_room_number(num_walk_in=1, num_bus=1, num_ship=1, num_fleet=1):
         room_num = pow(2, o) * pow(3, 0) * pow(5, 0) * pow(7, 0)
         room_number.append((room_num, [0, 0, 0, 0, o]))
 
-    for i in range(1, num_fleet + 1):
-        for j in range(1, num_ship + 1):
-            for k in range(1, num_bus + 1):
-                for l in range(1, num_walk_in + 1):
-                    room_num = pow(2, l) * pow(3, k) * pow(5, j) * pow(7, i)
-                    room_number.append((room_num, [0, i, j, k, l]))
+    new_guests = num_fleet * num_ship * num_bus * num_walk_in 
 
+    for guest in range(1, new_guests + 1):
+        l = (guest-1) % num_walk_in + 1
+        k = ((guest-1) // num_walk_in) % num_bus + 1
+        j = ((guest-1) // (num_walk_in * num_bus)) % num_ship + 1
+        i = ((guest-1) // (num_walk_in * num_bus * num_ship)) % num_fleet + 1
+        room_num = pow(2, l) * pow(3, k) * pow(5, j) * pow(7, i)
+        room_number.append((room_num, [0, i, j, k, l]))
     
     end_time = time.time()
     execute_time = end_time - start_time
@@ -370,47 +371,35 @@ def generate_room_number(num_walk_in=1, num_bus=1, num_ship=1, num_fleet=1):
     return room_number
 
 def receive_guests():
-    # global total_num_walk_in, total_num_bus, total_num_ship, total_num_fleet
-    
     receive_guests = [x for x in input("Route of guest arrival : ").split('/')]
     start_time = time.time()
     for i in range(len(receive_guests)):
         route, amount = receive_guests[i].split(':')
         if route == 'walk_in':
             num_walk_in = int(amount)
-            # total_num_walk_in += num_walk_in
             list_room_number = generate_room_number(num_walk_in)
             add_room(list_room_number)
             
         elif route == 'bus':
             num_bus, num_walk_in = map(int, amount.split(','))
-            # total_num_bus += num_bus
-            # total_num_walk_in += num_walk_in
             list_room_number = generate_room_number(num_walk_in, num_bus)
             add_room(list_room_number)
         
         elif route == 'ship':
             num_ship, num_bus, num_walk_in = map(int, amount.split(','))
-            # total_num_ship += num_ship
-            # total_num_bus += num_bus
-            # total_num_walk_in += num_walk_in
             list_room_number = generate_room_number(num_walk_in, num_bus, num_ship)
             add_room(list_room_number)
         
         elif route == 'fleet':
             num_fleet, num_ship, num_bus, num_walk_in = map(int, amount.split(','))
-            # total_num_fleet += num_fleet
-            # total_num_ship += num_ship
-            # total_num_bus += num_bus
-            # total_num_walk_in += num_walk_in
             list_room_number = generate_room_number(num_walk_in, num_bus, num_ship, num_fleet)
             add_room(list_room_number)
-    if route == 'walk_in' or route == 'bus' or route == 'ship' or route == 'fleet':
-        print("Route : ", route)
-        end_time = time.time()
-        execute_time = end_time - start_time
-        execution_times["receive_guests"] = execute_time
-        print(f"receive_guests - time used = {execute_time:.4f} seconds")
+
+    print(f"receive guests successfully.")
+    end_time = time.time()
+    execute_time = end_time - start_time
+    execution_times["receive_guests"] = execute_time
+    print(f"receive_guests - time used = {execute_time:.4f} seconds")
 
 
 def add_room(list_room_number):
@@ -441,20 +430,22 @@ def move_old_guest(list_old_guest):
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------
 # Function Group 2 - Manual Room Management
+
+
 def add_room_manual():
     global manual_count
     room_number_add = input("Enter room number : ")
     start_time = time.time()
     if room_number_add == '0' or (not room_number_add.isnumeric()) :
         print("Room number must be countable number ")
-        return
-    room_number_add  = int(room_number_add)
-    if search_room(room_number_add) :
-        print (f"Room {room_number_add} is occupied.") 
     else :
-        bplustree.insert(room_number_add,[manual_count,0,0,0,0])
-        manual_count += 1
-        print(f"Room number {room_number_add} added successfully.")
+        room_number_add  = int(room_number_add)
+        if search_room(room_number_add) :
+            print (f"Room {room_number_add} is occupied.") 
+        else :
+            bplustree.insert(room_number_add,[manual_count,0,0,0,0])
+            manual_count += 1
+            print(f"Room number {room_number_add} added successfully.")
 
     end_time = time.time()
     execute_time = end_time - start_time
@@ -462,48 +453,51 @@ def add_room_manual():
     print(f"add_room_manual - time used = {execute_time:.4f} seconds")
 
 def remove_room_manual():
-    room_number_remove = int(input("Enter room number : "))
+    room_number_remove = input("Enter room number : ")
     start_time = time.time()
-    if not search_room(room_number_remove) :
-        print (f"Room {room_number_remove} does not exist in the hotel.")
-        return
+    if room_number_remove == '0' or (not room_number_remove.isnumeric()) :
+        print("Room number must be countable number ")
     else :
-        bplustree.delete(room_number_remove)
-        print(f"Room number {room_number_remove} removed successfully.")
+        room_number_remove = int(room_number_remove)
+        if not search_room(room_number_remove) :
+            print (f"Room {room_number_remove} does not exist in the hotel.")
+        else :
+            bplustree.delete(room_number_remove)
+            print(f"Room number {room_number_remove} removed successfully.")
     end_time = time.time()
     execute_time = end_time - start_time
     execution_times["remove_room_manual"] = execute_time
-    print(f"remove_room_manual - time used = {execute_time:.4f} seconds")        
-
+    print(f"remove_room_manual - time used = {execute_time:.4f} seconds")
 #-------------------------------------------------------------------------------------------------------------------------------------------
 # Function Group 3 - Room Operations and Display
 def search_room(find_room = None) :
+    start_time = time.time()
+    
     p = 0
     if find_room == None :
         room_number = int(input("Seacrh Room Number: "))
-        start_time = time.time()
     else :
         p = 1
         room_number = find_room
-    leaf = bplustree.find(room_number) #Function that this Tree already give so use it why not only BigO (log N) :D
+    leaf = bplustree.find(room_number) 
     if room_number in leaf.keys :
         if p == 0 :
-            print (f"Room {room_number} exists in the hotel.")  #print for DEBUG you can delete if you want
+            print (f"Room {room_number} is occupied")  
             end_time = time.time()
             execute_time = end_time - start_time
             execution_times["search_room"] = execute_time
             print(f"----------------Time usage of each functionc-------------------")
             print(f"search_room - time used = {execute_time:.4f} seconds")
-        return True #Return if room already in hotel
+        return True 
     else:
         if find_room == None :
-            print (f"Room {room_number} does not exist in the hotel.")
+            print (f"Room {room_number} is not occpied.")
             end_time = time.time()
             execute_time = end_time - start_time
             execution_times["search_room"] = execute_time
             print(f"----------------Time usage of each functionc-------------------")
             print(f"search_room - time used = {execute_time:.4f} seconds")
-        return False #Return if room is not in hotel
+        return False 
 
 
 def show_available_rooms():
@@ -643,3 +637,21 @@ if __name__ == '__main__':
     recieve_command = True
     while recieve_command :
         recieve_command = manage_command()
+
+
+
+# help
+# SH
+# ADD 0 0.5 1 15
+# SH
+# RM 3
+# SH
+# RM 33
+# SH
+# RG fleet:1,2,3,2/bus:4,2
+# SH 
+# SR 630
+# SR 1000
+# EX
+# DM
+# PT
