@@ -1,15 +1,25 @@
+import time
 
 splits = 0
 parent_splits = 0
 fusions = 0
 parent_fusions = 0
+manual_count = 1
+# Memory Usage data byte 
+tree_structure = []
+# function recursive time usage
+show_available_rooms_time = 0
+inorder_leaf_time = 0
+# dictionary keep execute_time list
+execution_times = {}
+room_number = []
 
 
 class Node(object):
     """Base node object. It should be index node
     Each node stores keys and children.
     Attributes:
-        parent
+    parent
     """
 
     def __init__(self, parent=None):
@@ -210,38 +220,11 @@ class BPlusTree(object):
         self.minimum: int = self.maximum // 2
         self.depth = 0
 
-    def find(self, key) -> Leaf:
-        """ find the leaf
-        Returns:
-            Leaf: the leaf which should have the key
-        """
-        node = self.root
-        # Traverse tree until leaf node is reached.
-        while type(node) is not Leaf:
-            node = node[key]
-
-        return node
 
     def __getitem__(self, item):
         return self.find(item)[item]
 
-    def query(self, key):
-        """Returns a value for a given key, and None if the key does not exist."""
-        leaf = self.find(key)
-        return leaf[key] if key in leaf.keys else None
-
-    def change(self, key, value):
-        """change the value
-        Returns:
-            (bool,Leaf): the leaf where the key is. return False if the key does not exist
-        """
-        leaf = self.find(key)
-        if key not in leaf.keys:
-            return False, leaf
-        else:
-            leaf[key] = value
-            return True, leaf
-
+    
     def __setitem__(self, key, value, leaf=None):
         """Inserts a key-value pair after traversing to a leaf node. If the leaf node is full, split
               the leaf node into two.
@@ -252,7 +235,20 @@ class BPlusTree(object):
         if len(leaf.keys) > self.maximum:
             self.insert_index(*leaf.split())
 
-    def insert(self, key, value):
+    def find(self, key) -> Leaf:  #Tin
+        """ find the leaf
+        Returns:
+            Leaf: the leaf which should have the key
+        """
+        node = self.root
+        # Traverse tree until leaf node is reached.
+        while type(node) is not Leaf:
+            node = node[key]
+
+
+        return node
+
+    def insert(self, key, value): 
         """
         Returns:
             (bool,Leaf): the leaf where the key is inserted. return False if already has same key
@@ -282,7 +278,7 @@ class BPlusTree(object):
         # Once a leaf node is split, it consists of a internal node and two leaf nodes.
         # These need to be re-inserted back into the tree.
 
-    def delete(self, key, node: Node = None):
+    def delete(self, key, node: Node = None): # delete
         if node is None:
             node = self.find(key)
         del node[key]
@@ -299,52 +295,41 @@ class BPlusTree(object):
                 node.fusion()
                 self.delete(key, node.parent)
 
-    def show(self, node=None, file=None, _prefix="", _last=True):
+    def print_tree(self, node=None, file=None, _prefix="", _last=True):  #junior
         """Prints the keys at each level."""
         if node is None:
             node = self.root
-        print(_prefix, "`- " if _last else "|- ", node.keys, sep="", file=file)
+            
+        print(_prefix, "- " if _last else "|- ", node.keys, sep="", file=file)
         _prefix += "   " if _last else "|  "
-
         if type(node) is Node:
             # Recursively print the key of child nodes (if these exist).
             for i, child in enumerate(node.values):
                 _last = (i == len(node.values) - 1)
-                self.show(child, file, _prefix, _last)
+                self.print_tree(child, file, _prefix, _last)
 
-    def output(self):
-        return splits, parent_splits, fusions, parent_fusions, self.depth
+    def append_tree(self, node=None, file=None, _prefix="", _last=True):  #blue
+        """Prints the keys at each level."""
+        if node is None:
+            node = self.root
+            
+        tree_structure.append(node.keys)
+        if type(node) is Node:
+            # Recursively print the key of child nodes (if these exist).
+            for i, child in enumerate(node.values):
+                _last = (i == len(node.values) - 1)
+                self.append_tree(child, file, _prefix, _last)
 
-    def readfile(self, reader):
-        i = 0
-        for i, line in enumerate(reader):
-            s = line.decode().split(maxsplit=1)
-            self[s[0]] = s[1]
-            if i % 1000 == 0:
-                print('Insert ' + str(i) + 'items')
-        return i + 1
 
-    def leftmost_leaf(self) -> Leaf:
+    def leftmost_leaf(self) -> Leaf: #Tin
         node = self.root
         while type(node) is not Leaf:
             node = node.values[0]
         return node
 
-    def inorder(self, node=None, L=[]):
-        """Perform in-order traversal on the B+ Tree and print keys in order."""
-        if node is None:
-            node = self.root  # Start from the root if no node is provided
-        if isinstance(node, Leaf):  # If it's a leaf node, print its keys
-            for key in node.keys:
-                L.append(key)
-        else:
-            # Traverse internal node by recursively traversing children
-            for i in range(len(node.keys)):
-                self.inorder(node.values[i],L)  # Visit the child
-            self.inorder(node.values[-1],L)  # Traverse the last child
-        return L
     
-    def inorder_leaf(self):
+    def inorder_leaf(self): #Tin
+        start_time = time.perf_counter_ns()
         """Perform in-order traversal and return keys (room numbers) from the leaf nodes only."""
         leaf = bplustree.leftmost_leaf()  # Start from the leftmost leaf
         result = []
@@ -352,136 +337,299 @@ class BPlusTree(object):
         while leaf is not None:
             result.extend(leaf.keys)  # Collect all keys in the current leaf
             leaf = leaf.next  # Move to the next leaf in the linked list
-        return result
+        end_time = time.perf_counter_ns()
+        inorder_leaf_times = (end_time - start_time) /1000
+        return result,inorder_leaf_times
 
-#---------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+def generate_room_number(num_walk_in=1, num_bus=1, num_ship=1, num_fleet=1): 
+    start_time = time.time()
+    global room_number
+    room_number = []
+    list_old_guest = bplustree.inorder_leaf()[0]
+    num_old_guest = len(list_old_guest)
+    move_old_guest(list_old_guest)
 
-def generate_room_number(num_walk_in = 1, num_bus = 1, num_ship = 1, num_fleet = 1): 
-      room_number = []
-      list_old_guest = bplustree.inorder()
-      num_old_guest = len(list_old_guest)
-      move_old_guest(list_old_guest)
-      for o in range(num_old_guest) :
-            room_num = pow(2,o)*pow(3,0)*pow(5,0)*pow(7,0)
-            room_number.append((room_num,[0,0,0,o]))
-      for i in range(1,num_fleet+1) :
-            for j in range(1,num_ship+1) :
-                  for k in range(1,num_bus+1) :
-                        for l  in range(1,num_walk_in+1) :
-                              room_num = pow(2,l)*pow(3,k)*pow(5,j)*pow(7,i)
-                              room_number.append((room_num,[i,j,k,l]))
-      sort_rooms(room_number,0,len(room_number)-1)
-      return room_number
+    for o in range(num_old_guest):
+        room_num = pow(2, o) * pow(3, 0) * pow(5, 0) * pow(7, 0)
+        room_number.append((room_num, [0, 0, 0, 0, o]))
+
+    new_guests = num_fleet * num_ship * num_bus * num_walk_in 
+
+    for guest in range(1, new_guests + 1):
+        l = (guest-1) % num_walk_in + 1
+        k = ((guest-1) // num_walk_in) % num_bus + 1
+        j = ((guest-1) // (num_walk_in * num_bus)) % num_ship + 1
+        i = ((guest-1) // (num_walk_in * num_bus * num_ship)) % num_fleet + 1
+        room_num = pow(2, l) * pow(3, k) * pow(5, j) * pow(7, i)
+        room_number.append((room_num, [0, i, j, k, l]))
+    
+    end_time = time.time()
+    execute_time = end_time - start_time
+
+    execution_times["generate_room_number"] = execute_time
+    print(f"generate_room_number - time used = {execute_time:.4f} seconds")
+    return room_number
 
 def receive_guests():
-      receive_guests = [x for x in input("Route of guest arrival : ").split('/')]
-      for i in range(len(receive_guests)) :
-            route,amount = receive_guests[i].split(':')
-            if route == 'walk_in' :
-                  num_walk_in = amount[0]
-                  list_room_number = generate_room_number(int(num_walk_in))
-            elif route == 'bus' :
-                  num_bus , num_walk_in = amount.split(',')
-                  list_room_number = generate_room_number(int(num_walk_in),int(num_bus))
-            elif route == 'ship' :
-                  num_ship, num_bus , num_walk_in = amount.split(',')
-                  list_room_number = generate_room_number(int(num_walk_in),int(num_bus),int(num_ship))
-            elif route == 'fleet' :
-                  num_fleet, num_ship, num_bus , num_walk_in = amount.split(',')
-                  list_room_number = generate_room_number(int(num_walk_in),int(num_bus),int(num_ship),int(num_fleet))
-            print(list_room_number)
-      add_room(list_room_number)
+    receive_guests = [x for x in input("Route of guest arrival : ").split('/')]
+    start_time = time.time()
+    for i in range(len(receive_guests)):
+        route, amount = receive_guests[i].split(':')
+        if route == 'walk_in':
+            num_walk_in = int(amount)
+            list_room_number = generate_room_number(num_walk_in)
+            add_room(list_room_number)
+            
+        elif route == 'bus':
+            num_bus, num_walk_in = map(int, amount.split(','))
+            list_room_number = generate_room_number(num_walk_in, num_bus)
+            add_room(list_room_number)
+        
+        elif route == 'ship':
+            num_ship, num_bus, num_walk_in = map(int, amount.split(','))
+            list_room_number = generate_room_number(num_walk_in, num_bus, num_ship)
+            add_room(list_room_number)
+        
+        elif route == 'fleet':
+            num_fleet, num_ship, num_bus, num_walk_in = map(int, amount.split(','))
+            list_room_number = generate_room_number(num_walk_in, num_bus, num_ship, num_fleet)
+            add_room(list_room_number)
+
+    print(f"receive guests successfully.")
+    end_time = time.time()
+    execute_time = end_time - start_time
+    execution_times["receive_guests"] = execute_time
+    print(f"receive_guests - time used = {execute_time:.4f} seconds")
 
 
 def add_room(list_room_number):
+    start_time = time.time()
+
     for room_number,route_data in list_room_number:
-        bplustree[room_number] = route_data
+            bplustree.insert(room_number,route_data)
+            
+    end_time = time.time()
+    execute_time = end_time - start_time
+    execution_times["add_room"] = execute_time
+    print(f"add_room - time used = {execute_time:.4f} seconds")
+
 
 def move_old_guest(list_old_guest):
+    start_time = time.time()
+    
+    global manual_count
+    manual_count = 1
     for guest in list_old_guest :
       bplustree.delete(guest)
+      
+    end_time = time.time()
+    execute_time = end_time - start_time
+    execution_times["move_old_guest"] = execute_time
+    print(f"----------------Time usage of each functionc-------------------")
+    print(f"move_old_guest - time used = {execute_time:.4f} seconds")
 
-def set_up_hotel():
-    for i in range(5):
-        bplustree[i] = [0,0,0,i]
+#-----------------------------------------------------------------------------------------------------------------------------------------------
+# Function Group 2 - Manual Room Management
 
 
+def add_room_manual():
+    global manual_count
+    room_number_add = input("Enter room number : ")
+    start_time = time.time()
+    if room_number_add == '0' or (not room_number_add.isnumeric()) :
+        print("Room number must be countable number ")
+    else :
+        room_number_add  = int(room_number_add)
+        if search_room(room_number_add) :
+            print (f"Room {room_number_add} is occupied.") 
+        else :
+            bplustree.insert(room_number_add,[manual_count,0,0,0,0])
+            manual_count += 1
+            print(f"Room number {room_number_add} added successfully.")
+
+    end_time = time.time()
+    execute_time = end_time - start_time
+    execution_times["add_room_manual"] = execute_time
+    print(f"add_room_manual - time used = {execute_time:.4f} seconds")
+
+def remove_room_manual():
+    room_number_remove = input("Enter room number : ")
+    start_time = time.time()
+    if room_number_remove == '0' or (not room_number_remove.isnumeric()) :
+        print("Room number must be countable number ")
+    else :
+        room_number_remove = int(room_number_remove)
+        if not search_room(room_number_remove) :
+            print (f"Room {room_number_remove} does not exist in the hotel.")
+        else :
+            bplustree.delete(room_number_remove)
+            print(f"Room number {room_number_remove} removed successfully.")
+    end_time = time.time()
+    execute_time = end_time - start_time
+    execution_times["remove_room_manual"] = execute_time
+    print(f"remove_room_manual - time used = {execute_time:.4f} seconds")
+#-------------------------------------------------------------------------------------------------------------------------------------------
 # Function Group 3 - Room Operations and Display
-def sort_rooms(room_number,low,high):
-    if low < high:
-
-        pi = partition(room_number, low, high)
-
-
-        sort_rooms(room_number, low, pi - 1)
-        sort_rooms(room_number, pi + 1, high)
+def search_room(find_room = None) :
+    start_time = time.time()
     
-
-
-def partition(arr, low, high):
-  
-
-    pivot = arr[high][0]
-    
-    i = low - 1
-    for j in range(low, high):
-        if arr[j][0] < pivot:
-            i += 1
-            arr[i], arr[j] = arr[j], arr[i]
-
-    arr[i + 1], arr[high] = arr[high], arr[i + 1]
-    return i + 1
-
-
-
-def search_room(): #if you want to pass parameter delete below code and add to parameter instead อ่านอังกฤษเอานะ ขก เขียนไทย
-    room_number = int(input("Seacrh Room Number: ")) # delete this if you dont want it
-    
-    leaf = bplustree.find(room_number) #Function that this Tree already give so use it why not only BigO (log N) :D
-    if room_number in leaf.keys:
-        print (f"Room {room_number} exists in the tree.")  #print for DEBUG you can delete if you want
-        return True #Return if room already in tree
+    p = 0
+    if find_room == None :
+        room_number = int(input("Seacrh Room Number: "))
+    else :
+        p = 1
+        room_number = find_room
+    leaf = bplustree.find(room_number) 
+    if room_number in leaf.keys :
+        if p == 0 :
+            print (f"Room {room_number} is occupied")  
+            end_time = time.time()
+            execute_time = end_time - start_time
+            execution_times["search_room"] = execute_time
+            print(f"----------------Time usage of each functionc-------------------")
+            print(f"search_room - time used = {execute_time:.4f} seconds")
+        return True 
     else:
-        print (f"Room {room_number} does not exist in the tree.") #for DEBUG you can delete
-        return False #Return if room is not in tree
+        if find_room == None :
+            print (f"Room {room_number} is not occupied")
+            end_time = time.time()
+            execute_time = end_time - start_time
+            execution_times["search_room"] = execute_time
+            print(f"----------------Time usage of each functionc-------------------")
+            print(f"search_room - time used = {execute_time:.4f} seconds")
+        return False 
+
 
 def show_available_rooms():
-   
+    # start_time = time.time()
+    start_time = time.perf_counter_ns()
     room = bplustree.inorder_leaf() #list that contain number of Room from leaf inorder that only get leaf
+    if len(room) == 0:
+        end_time = time.time()
+        execute_time = end_time - start_time
+        execution_times["show_available_rooms"] = execute_time
+        print(f"show_available_rooms - time used = {execute_time:.4f} seconds")
+        return 0
+   
+    # end_time = time.time()
+    print("Number of Available room ",int(room[-1] - len(room)))
+    end_time = time.perf_counter_ns()
+    show_available_rooms_times = (end_time - start_time) / 1000
+    print(f"----------------Time usage of each functionc-------------------")
+    print(f"inorder_leaf - time used = { room[1]:.4f} microseconds") 
+    print(f"show_available_room - time used = { show_available_rooms_times:.4f} microseconds") 
     
-    count = 0 #count availible room in tree
-    if room[0] != 0: #I dont know that do we still have room number 0 or not if not delete this for me thank you
-        count += 1
-    
-    for i in range (len(room)-1): #sadly it has to be BigO (N) D;
-        if room[i+1] - room[i] > 1:
-            count += room[i+1] - room[i]-1 
-    
-    return count
-            
-
+#----------------------------------------------------------------------------------------------------------------------------------------
 # Function Group 4: Performance Monitoring and Reporting
-def display_memory_usage():
-    pass
+def calculate_nested_list_memory(data):
+    total_elements = 0
+
+    def count_elements(node):
+        nonlocal total_elements
+        if isinstance(node, list):
+            total_elements += len(node)
+            for element in node:
+                if isinstance(element, list):
+                    count_elements(element)
+    
+    count_elements(data)
+
+    # Suppose that each element (number) is approximately 8 bytes (for integers).
+    element_size = 8
+    memory_usage = total_elements * element_size
+    
+    return memory_usage, total_elements
+
+def display_memory_usage(data):
+    memory_usage, total_elements = calculate_nested_list_memory(data)
+    print(f"Memory usage: {memory_usage} bytes for {total_elements} elements.")
 
 def write_to_file(filename="hotel_report.txt"):
-    pass
+    global room_number
+    # , total_num_walk_in, total_num_bus, total_num_ship, total_num_fleet
+    
+    with open(filename, "w") as file:
+        
+        leaf = bplustree.leftmost_leaf()  # Start from the leftmost leaf
+        room_in_hotel = []
+        while leaf is not None:
+            room_in_hotel.append(leaf)  # Collect all keys in the current leaf
+            leaf = leaf.next  # Move to the next leaf in the linked list
 
-def measure_time(func, *args):
-    pass
+        for room in room_in_hotel :
+            for i in range(len(room.keys)):
+                file.write(f'room_number : {room.keys[i]} , route : no_{room.values[i][0]}_{room.values[i][1]}_{room.values[i][2]}_{room.values[i][3]}_{room.values[i][4]}\n')
+       
 
+    print(f"Data written to {filename}")
+
+def print_measure_time():  
+    print("\nExecution times:")
+    for func_name, exec_time in execution_times.items():
+        print(f"{func_name} : {exec_time:.4f} seconds")
+    
+    
+#------------------------------------------------------------------------------------------------------------------------------------------
+def set_up_hotel():
+    for i in range(1,6):
+        bplustree.insert(i,[0,0,0,0,i])
+    
 def manage_command():
-    command = input("Enter your command : ")
-    if command == 'RG':
+    command = input("Enter your command : ").upper()
+#     fleet:5,4,7,10/bus:3,4
+    if command == 'RG':      # receive guests
         receive_guests()
         return True
-    elif command == 'C':
+    elif command == 'C':     # cancle command
         return False
-    elif command == "S":   # in tree or not in tree
+    elif command == "SR":    # search room
         search_room()
         return True
-    elif command == "A":
-        print(show_available_rooms()) # integer <3
+    elif command == "AR":    # availble room
+        show_available_rooms()
+        return True
+    elif command == "ADD" :   # add room manual
+        add_room_manual()
+        return True
+    elif command == 'RM' :   # remove room manual
+        remove_room_manual()
+        return True
+    elif command == 'SH' :   
+        s = bplustree.inorder_leaf()
+        print(s[0])
+        print(f"----------------Time usage of each functionc-------------------")
+        print(f"inorder_leaf - time used = {s[1]:.4f} microseconds")
+        return True
+    elif command == 'PT' :  
+        bplustree.print_tree()
+        return True
+    elif command == 'DM' :    # Data Memmory Usage
+        bplustree.append_tree()
+        # print(tree_structure)
+        display_memory_usage(tree_structure)
+        # display_memory_usage(room_number)
+        return True
+    elif command == 'EX':     # Write export file
+        write_to_file()
+        return True
+    elif command == 'HELP':
+        print("ADD : add room manual\n")
+        print("RM : remove room manual\n")
+        print("RG : receive_guests (add and sort room number in B+tree)")
+        print("\tfleet:{number of fleet},{number of ship},{number of bus},{number of walk in}\n\tship:{number of ship},{number of bus},{number of walk in}\n\tbus:{number of bus},{number of walk in}\n\twalk_in:{number of walk in}")
+        print("\texample : fleet:5,4,7,10/bus:3,4 or walk_in:10\n")
+        print("SR : search room\n")
+        print("AR : show number of availble room\n")
+        print("EX : write export file hotel_report.txt\n")
+        print("DM : Display memory usage\n")
+
+        print("Extra command\n")
+        print("C : cancle command\n")
+        print("SH : show occupied room\n")
+        print("PT : print B+tree\n")
+        return True
+    else:
         return True
 
 if __name__ == '__main__':
@@ -490,5 +638,21 @@ if __name__ == '__main__':
     recieve_command = True
     while recieve_command :
         recieve_command = manage_command()
-    
-    
+
+
+
+# help
+# SH
+# ADD 0 0.5 1 15
+# SH
+# RM 3
+# SH
+# RM 33
+# SH
+# RG fleet:1,2,3,2/bus:4,2
+# SH 
+# SR 630
+# SR 1000
+# EX
+# DM
+# PT
