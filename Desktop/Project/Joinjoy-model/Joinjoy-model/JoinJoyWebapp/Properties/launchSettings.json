@@ -1,0 +1,27 @@
+﻿{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5267",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SUPABASE_URL" : "https://eifdfdbizfrcjylvyebs.supabase.co/",
+        "SUPABASE_KEY" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpZmRmZGJpemZyY2p5bHZ5ZWJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg4Mjc2MTEsImV4cCI6MjA1NDQwMzYxMX0.Woa7neHyMI2bxK5_UOr2LvIspratEfNNxi1SEe8OMRE"
+      }
+    },
+    "https": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "https://localhost:7069;http://localhost:5267",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SUPABASE_URL" : "https://eifdfdbizfrcjylvyebs.supabase.co/",
+        "SUPABASE_KEY" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpZmRmZGJpemZyY2p5bHZ5ZWJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg4Mjc2MTEsImV4cCI6MjA1NDQwMzYxMX0.Woa7neHyMI2bxK5_UOr2LvIspratEfNNxi1SEe8OMRE"
+      }
+    },
+  }
+}

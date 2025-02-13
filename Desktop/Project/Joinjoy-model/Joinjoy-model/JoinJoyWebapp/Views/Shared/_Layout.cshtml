@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - JoinJoyWebapp</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/JoinJoyWebapp.styles.css" asp-append-version="true" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet' asp-append-version="true">
+</head>
+<body>
+    
+    <nav>
+        <i class='bx bx-menu toggle-sidebar'></i>
+        <div class="nav-bar">
+            <div class="logo">
+                <img src="/assets/logo.png" alt="JoinJoy Logo" width="50" height="50">
+                <h2>JoinJoy</h2>
+            </div>
+            <div class="search-box">
+                <i class='bx bx-search'></i>
+                <input type="text" class="search-input" placeholder="search" aria-label="Search">
+            </div>
+            <div class="profile" aria-label="User Profile">
+                <h3>
+                    Profile
+                </h3>
+                <i class='bx bx-user'></i>
+            </div>
+        </div>
+    </nav>
+
+    <div class="sidebar">
+        <ul>
+            <li class="items sidebar-home">
+                <a href="#">
+                    <i class='bx bx-home-alt'></i>
+                    <span class="text">Home</span>
+                </a>
+            </li>
+            <li class="items sidebar-category">
+                <a href="#">
+                    <i class='bx bx-category'></i>
+                    <span class="text">Category</span>
+                </a>
+            </li>
+            <li class="items sidebar-interest">
+                <a href="#">
+                    <i class='bx bx-heart-circle'></i>
+                    <span class="text">Interested</span>
+                </a>
+            </li>
+            <li class="items sidebar-appointment">
+                <a href="#">
+                    <i class='bx bx-calendar'></i>
+                    <span class="text">Appointment</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-create-btn">
+            <i class='bx bx-plus-circle'></i>
+            <p>Create Party</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2568 - JoinJoyWebapp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
